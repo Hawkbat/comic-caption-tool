@@ -32,6 +32,7 @@ const ctx = canvas.getContext("2d")!
 const tray = document.createElement("div")
 tray.id = "tray"
 document.body.append(tray)
+tray.style.display = activeBubble ? "" : "none"
 
 const fieldRefreshCallbacks: (() => void)[] = []
 
@@ -125,6 +126,7 @@ canvas.addEventListener("mousedown", e => {
     }
     activeBubble = clickBubble
     refreshFields()
+    tray.style.display = activeBubble ? "" : "none"
     fieldText.focus()
     redraw()
 })
@@ -165,6 +167,7 @@ canvas.addEventListener("dblclick", e => {
         newBubble.tailPos = [mx - 100, my + 100]
         bubbles.push(newBubble)
         activeBubble = newBubble
+        tray.style.display = activeBubble ? "" : "none"
         fieldText.focus()
     } else {
         bubbles.splice(bubbles.indexOf(existing), 1)

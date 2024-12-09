@@ -27,6 +27,7 @@ const ctx = canvas.getContext("2d");
 const tray = document.createElement("div");
 tray.id = "tray";
 document.body.append(tray);
+tray.style.display = activeBubble ? "" : "none";
 const fieldRefreshCallbacks = [];
 const fieldText = makeField("Text", "textarea", [], () => activeBubble?.text ?? "", v => activeBubble ? activeBubble.text = v : void 0);
 makeField("Align", "select", [["Left", "left"], ["Center", "center"], ["Right", "right"]], () => activeBubble?.align ?? "left", v => activeBubble ? activeBubble.align = v : void 0);
@@ -113,6 +114,7 @@ canvas.addEventListener("mousedown", e => {
     }
     activeBubble = clickBubble;
     refreshFields();
+    tray.style.display = activeBubble ? "" : "none";
     fieldText.focus();
     redraw();
 });
@@ -153,6 +155,7 @@ canvas.addEventListener("dblclick", e => {
         newBubble.tailPos = [mx - 100, my + 100];
         bubbles.push(newBubble);
         activeBubble = newBubble;
+        tray.style.display = activeBubble ? "" : "none";
         fieldText.focus();
     }
     else {
