@@ -1,5 +1,4 @@
 "use strict";
-const TAIL_WIDTH = 15;
 const TAIL_SELECT_RADIUS = 20;
 const bubbles = [];
 let loadedImage = null;
@@ -29,10 +28,13 @@ tray.id = "tray";
 document.body.append(tray);
 tray.style.display = activeBubble ? "" : "none";
 const fieldRefreshCallbacks = [];
+makeFieldGroup("Bubble");
 const fieldText = makeField("Text", "textarea", [], () => activeBubble?.text ?? "", v => activeBubble ? activeBubble.text = v : void 0);
 makeField("Align", "select", [["Left", "left"], ["Center", "center"], ["Right", "right"]], () => activeBubble?.align ?? "left", v => activeBubble ? activeBubble.align = v : void 0);
 makeField("Bubble Shape", "select", [["Tight Curves", "fit"], ["Box", "box"]], () => activeBubble?.shape ?? "fit", v => activeBubble ? activeBubble.shape = v : void 0);
 makeField("Tail Shape", "select", [["Point", "point"], ["No Tail", "none"]], () => activeBubble?.tailShape ?? "point", v => activeBubble ? activeBubble.tailShape = v : void 0);
+makeField("Tail Width", "number", [], () => String(activeBubble?.tailWidth ?? 0), v => activeBubble ? activeBubble.tailWidth = Number(v) : void 0);
+makeFieldGroup("Style");
 makeField("Font", "text", [], () => activeStyle.font, v => activeStyle.font = v),
     makeField("Font Size", "number", [], () => String(activeStyle.fontSize), v => activeStyle.fontSize = Number(v));
 makeField("Text Fill", "color", [], () => activeStyle.textFill, v => activeStyle.textFill = v);
@@ -76,8 +78,14 @@ function makeField(label, type, options, read, write) {
     fieldRefreshCallbacks.push(refresh);
     return { labelEl, spanEl, inputEl, focus, refresh };
 }
+function makeFieldGroup(label) {
+    const spanEl = document.createElement("span");
+    spanEl.textContent = label;
+    tray.append(spanEl);
+    return { spanEl };
+}
 const instructions = document.createElement("p");
-instructions.innerHTML = "Drag and drop an image onto the canvas to begin editing. Double-click on empty spaces to add new speech bubbles, or double-click on existing speech bubbles to remove them. Edit bubble properties and styles using the fields in the bottom tray. You can click and drag bubbles or the tips of the bubble tails to move them around. When you're done editing, you can save the image by right-clicking on the canvas and selecting Save Image As...";
+instructions.innerHTML = "Drag and drop an image onto the canvas to begin editing. Double-click on empty spaces to add new speech bubbles, or double-click on existing speech bubbles to remove them. Edit bubble properties and styles using the fields in the bottom tray. You can click and drag bubbles or the tips of the bubble tails to move them around. When you're done editing, you can save the image by right-clicking on the canvas and selecting Save Image As...<br><br>Tips:<br><br>You should be able to use the names of any font installed on your PC.<br>Set bubble stroke with to 0 to disable it if using a lower bubble opacity.<br>Styles affect all bubbles in the image.";
 document.body.append(instructions);
 canvas.addEventListener("dragover", e => {
     e.preventDefault();
@@ -160,6 +168,10 @@ canvas.addEventListener("dblclick", e => {
     }
     else {
         bubbles.splice(bubbles.indexOf(existing), 1);
+        if (existing === activeBubble) {
+            activeBubble = null;
+        }
+        tray.style.display = activeBubble ? "" : "none";
     }
     redraw();
 });
@@ -209,7 +221,7 @@ function getMouseBubbleTail(e) {
     return closestTail;
 }
 function makeBubble() {
-    return { text: "", align: "left", shape: "fit", pos: [0, 0], tailShape: "point", tailPos: [0, 0] };
+    return { text: "", align: "left", shape: "fit", pos: [0, 0], tailShape: "point", tailWidth: 15, tailPos: [0, 0] };
 }
 function vec2(x, y) {
     return [x, y];
@@ -288,8 +300,8 @@ function calculatePath(bubble) {
         const [tailOriginX, tailOriginY] = bounds.center;
         const [tailDX, tailDY] = normalize(tailX - tailOriginX, tailY - tailOriginY);
         const [tailPerpX, tailPerpY] = [tailDY, -tailDX];
-        const [tailStartX, tailStartY] = [tailOriginX + tailPerpX * TAIL_WIDTH * 0.5, tailOriginY + tailPerpY * TAIL_WIDTH * 0.5];
-        const [tailEndX, tailEndY] = [tailOriginX + -tailPerpX * TAIL_WIDTH * 0.5, tailOriginY + -tailPerpY * TAIL_WIDTH * 0.5];
+        const [tailStartX, tailStartY] = [tailOriginX + tailPerpX * bubble.tailWidth * 0.5, tailOriginY + tailPerpY * bubble.tailWidth * 0.5];
+        const [tailEndX, tailEndY] = [tailOriginX + -tailPerpX * bubble.tailWidth * 0.5, tailOriginY + -tailPerpY * bubble.tailWidth * 0.5];
         path.moveTo(tailStartX, tailStartY);
         path.lineTo(tailX, tailY);
         path.lineTo(tailEndX, tailEndY);
