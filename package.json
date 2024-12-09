@@ -1,0 +1,14 @@
+{
+  "name": "comic-caption-tool",
+  "version": "1.0.0",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc -w"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
