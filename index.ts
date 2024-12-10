@@ -21,6 +21,8 @@ let clickedTail = false
 let dragBubble: Bubble | null = null
 let activeBubble: Bubble | null = null
 
+let flipImage = false
+
 const canvas = document.createElement("canvas")
 canvas.width = 1024
 canvas.height = 1024
@@ -94,6 +96,14 @@ function makeFieldGroup(label: string) {
     tray.append(spanEl)
     return { spanEl }
 }
+
+const flipButton = document.createElement("button")
+flipButton.textContent = "Flip Image"
+flipButton.addEventListener("click", () => {
+    flipImage = !flipImage
+    redraw()
+})
+document.body.append(flipButton)
 
 const instructions = document.createElement("p")
 instructions.innerHTML = "Drag and drop an image onto the canvas to begin editing. Double-click on empty spaces to add new speech bubbles, or double-click on existing speech bubbles to remove them. Edit bubble properties and styles using the fields in the bottom tray. You can click and drag bubbles or the tips of the bubble tails to move them around. When you're done editing, you can save the image by right-clicking on the canvas and selecting Save Image As...<br><br>Tips:<br><br>You should be able to use the names of any font installed on your PC.<br>Set bubble stroke with to 0 to disable it if using a lower bubble opacity.<br>Styles affect all bubbles in the image."
@@ -345,7 +355,15 @@ function calculatePath(bubble: Bubble) {
 function redraw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     if (loadedImage) {
-        ctx.drawImage(loadedImage, 0, 0)
+        if (flipImage) {
+            ctx.save()
+            ctx.translate(canvas.width, 0)
+            ctx.scale(-1, 1)
+            ctx.drawImage(loadedImage, 0, 0)
+            ctx.restore()
+        } else {
+            ctx.drawImage(loadedImage, 0, 0)
+        }
     }
     for (const bubble of bubbles) {
         const lines = bubble.text.split("\n")
